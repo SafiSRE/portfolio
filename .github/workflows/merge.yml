@@ -1,0 +1,41 @@
+# .github/workflows/auto-merge.yml
+name: Auto-Merge Dev to Master
+
+on:
+  push:
+    branches:
+      - dev
+  workflow_dispatch:
+  
+# Grant the workflow write permission to the repository contents
+permissions:
+  contents: write
+
+jobs:
+  merge_to_master:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout dev branch
+      uses: actions/checkout@v3
+      with:
+        ref: dev
+        fetch-depth: 0
+
+    - name: Configure Git
+      run: |
+        git config user.name "github-actions"
+        git config user.email "actions@github.com"
+
+    - name: Merge dev into master
+      run: |
+        # Fetch master branch
+        git fetch origin main
+        # Checkout master branch
+        git checkout main
+        # Merge changes from dev into master
+        git merge origin/dev --no-ff -m "Auto merge from dev to master"
+        # Push the merge back to the repository
+        git push origin main
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
